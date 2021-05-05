@@ -35,7 +35,7 @@
 
 #VARIABLES - Set these to match your environment.
 #MANDATORY
-$tempDrives = @("C:","F:","T:") #Drives that you want to use for temp files
+$tempDrives = @("F:","T:") #Drives that you want to use for temp files
 $plotDir = "\\HOSTNAME\PlotFolder" #Local or shared Destination directory you want plots to be sent to (for example, \\SERVERNAME\Plots or G:\Plots)
 $logDir = "C:\temp\EnhancedChiaPlotter"
 $newPlots = 20 #Total number of plots to produce
