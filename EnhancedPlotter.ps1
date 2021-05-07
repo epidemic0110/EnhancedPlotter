@@ -41,13 +41,13 @@ $logDir = "C:\temp\EnhancedChiaPlotter"
 $newPlots = 20 #Total number of plots to produce
 #OPTIONAL - Advanced settings
 $tempFolder = "\ChiaTemp" #Name of folder to be used/created on the temp drives for temp files
-$tempPlotSize = 260 #Size that the temp files for one k32 plot take (Currently ~260GiB/240GB as of v1.1.3)
+$tempPlotSize = 265 #Max size that the temp files for one k32 plot could take (Currently ~260GiB/240GB as of v1.1.3, so set a little above that for buffer as temp sizes can vary)
 $threadsPerPlot = 2 #How many processor each plotting process should use. Feel free to experiment with higher numbers on high core systems, but general consesus is that there are diminishing returns above 2 threads
 $delayBetweenChecks = 600 #Delay (in seconds) between checks for sufficient free resources to start a new plot; DON'T SET THIS TOO LOW OR YOU RISK OVER-FILLING A DISK. 300-900 seconds (5-15 minutes) seem to be good values
 $lowDiskThreshold = .60 #A queue length of 1.0 or greater means a disk is saturated and cannot handle any more concurrent requests. Anything less than 1.0 theoretically means the disk isn't fully utilized, however it may not be ideal to target full saturation, especially on mechanical drives. A threshold in the range of .5-.8 is suggested, but tweak and let me know what you find best for overall throughput
 $lowCpuThreshold = 76 #How low should the CPU utilization percent be before a new plot is allowed to be started if other resources are free
 $lowMemThreshold = 1024 #Don't start a new plot if it would make system free memory drop below this amount (MB). For example if your $memoryBuffer value is set to 4096MB per plot, and your current system free memory is less than 4096+$lowMemThreshold, it won't start a new plot
-$memoryBuffer = 4096 #Amount of memory to limit each plotting process to. Default is 3390MiB but if you have lots of memory and CPU or disk I/O are your bottleneck, you can try increasing this number
+$memoryBuffer = 3390 #Amount of memory to limit each plotting process to. Default is 3390MiB but if you have lots of memory and CPU or disk I/O are your bottleneck, you can try increasing this number
 $initialDelay = 30 #Stagger delay (in minutes) before the very first instance starts on each tempDrive after the first. May help distribute plotting load across phases better, but untested- not sure if helpful or harmful to overall throughput
 ###################################################################################
 
