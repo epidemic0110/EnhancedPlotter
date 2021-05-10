@@ -35,27 +35,31 @@
 
 #VARIABLES - Set these to match your environment.
 #MANDATORY
-$tempDrives = @("F:","T:") #Drives that you want to use for temp files
-$plotDir = "\\HOSTNAME\PlotFolder" #Local or shared Destination directory you want plots to be sent to (for example, \\SERVERNAME\Plots or G:\Plots)
+$tempDrives = @("C:","F:","T:") #Drives that you want to use for temp files
+$plotDir = "\\Corei5Beast\Corei5Plot03" #Local or shared Destination directory you want plots to be sent to (for example, \\SERVERNAME\Plots or G:\Plots)
 $logDir = "C:\temp\EnhancedChiaPlotter"
-$newPlots = 20 #Total number of plots to produce
+$newPlots = 30 #Total number of plots to produce
 #OPTIONAL - Advanced settings
 $tempFolder = "\ChiaTemp" #Name of folder to be used/created on the temp drives for temp files
+$temp2Dir = $null #Full path to a directory to be used for staging the finished plot file before it is moved to the final $plotDir destination directory. If set, it uses the -tmp2_dir switch. If $null it does not stage the final files anywhere other than the source temp directory.
 $tempPlotSize = 265 #Max size that the temp files for one k32 plot could take (Currently ~260GiB/240GB as of v1.1.3, so set a little above that for buffer as temp sizes can vary)
 $threadsPerPlot = 2 #How many processor each plotting process should use. Feel free to experiment with higher numbers on high core systems, but general consesus is that there are diminishing returns above 2 threads
 $delayBetweenChecks = 600 #Delay (in seconds) between checks for sufficient free resources to start a new plot; DON'T SET THIS TOO LOW OR YOU RISK OVER-FILLING A DISK. 300-900 seconds (5-15 minutes) seem to be good values
 $lowDiskThreshold = .60 #A queue length of 1.0 or greater means a disk is saturated and cannot handle any more concurrent requests. Anything less than 1.0 theoretically means the disk isn't fully utilized, however it may not be ideal to target full saturation, especially on mechanical drives. A threshold in the range of .5-.8 is suggested, but tweak and let me know what you find best for overall throughput
-$lowCpuThreshold = 76 #How low should the CPU utilization percent be before a new plot is allowed to be started if other resources are free
+$lowCpuThreshold = 76 #How low should the CPU utilization percent be before a new plot is allowed to be started if other resources are free; This will vary depending on core count and if this is a dedicated plotter or not. If it is doing nothing else and you have lots of cores, you might want to set this to a high value, like 85%. If it is running a full node or farmer, you might want to keep it a bit lower to prevent plotting from using all of the CPU
 $lowMemThreshold = 1024 #Don't start a new plot if it would make system free memory drop below this amount (MB). For example if your $memoryBuffer value is set to 4096MB per plot, and your current system free memory is less than 4096+$lowMemThreshold, it won't start a new plot
-$memoryBuffer = 3390 #Amount of memory to limit each plotting process to. Default is 3390MiB but if you have lots of memory and CPU or disk I/O are your bottleneck, you can try increasing this number
-$initialDelay = 30 #Stagger delay (in minutes) before the very first instance starts on each tempDrive after the first. May help distribute plotting load across phases better, but untested- not sure if helpful or harmful to overall throughput
+$memoryBuffer = 4096 #Amount of memory to limit each plotting process to. Default is 3390MiB but if you have lots of memory and CPU or disk I/O are your bottleneck, you can try increasing this number
+$initialDelay = 0 #Stagger delay (in minutes) before the very first instance starts on each tempDrive after the first. May help distribute plotting load across phases better, but untested- not sure if helpful or harmful to overall throughput
 ###################################################################################
 
 #Run initial setup and health checks
 if (!(Get-CimInstance Win32_ComputerSystem).AutomaticManagedPagefile) { Write-Host "WARNING: Your system is not set to use an automatically managed page file. This can cause Chia to fail with `"Bad allocation`" errors." -ForegroundColor Red }
 if (!(Test-Path $plotDir)) { Write-Host "Plot directory does not exist, attempting to create."; New-Item -ItemType Directory -Force -Path $plotDir }
 if (!(Test-Path $logDir)) { Write-Host "Log directory does not exist, attempting to create.";New-Item -ItemType Directory -Force -Path $logDir }
+if (!(Test-Path $temp2Dir)) { Write-Host "Temp2 directory does not exist, attempting to create.";New-Item -ItemType Directory -Force -Path $temp2Dir }
 foreach ($tempDrive in $tempDrives) { if (!(Test-Path $tempDrive$tempFolder)) { Write-Host "Temp directory $tempDrive$tempFolder does not exist, attempting to create."; New-Item -ItemType Directory -Force -Path $tempDrive$tempFolder } }
+#$myarray = [System.Collections.ArrayList]::new()
+#$plots = [Object[][]]::new($newPlots)
 
 #Main Routine
 cd "~\appdata\local\chia-blockchain\app-*\resources\app.asar.unpacked\daemon"
@@ -99,7 +103,9 @@ for ($i = 1; $i -le $newPlots){
 
                         Write-Host "GO: Spinning off plot $i of $newPlots using $tempDrive in new process" -ForegroundColor Green
                         Write-Host "NEW POWERSHELL WINDOWS WILL CLOSE AUTOMATICALLY WHEN FINISHED. Do not close them unless you want to interrupt them." -ForegroundColor Green
-                        start-process powershell -ArgumentList ".\chia.exe plots create --size 32 --num 1 --num_threads $threadsPerPlot --tmp_dir `"$tempDrive$tempFolder`" --final_dir `"$plotDir`" --buffer $memoryBuffer -x | Tee-Object -FilePath `"$logDir\Plot$($i)_$(Get-Date -Format dd-mm-yyyy-hh-mm).txt`""
+                        #$plots[$i][0] = "Plot$($i)_$(Get-Date -Format dd-mm-yyyy-hh-mm).txt"
+                        if ($temp2Dir -ne $null) { start-process powershell -ArgumentList ".\chia.exe plots create --size 32 --num 1 --num_threads $threadsPerPlot --tmp_dir `"$tempDrive$tempFolder`" --final_dir `"$plotDir`" --tmp2_dir $temp2Dir --buffer $memoryBuffer -x | Tee-Object -FilePath `"$logDir\Plot$($i)_$(Get-Date -Format dd-mm-yyyy-hh-mm).txt`"" }
+                        else { start-process powershell -ArgumentList ".\chia.exe plots create --size 32 --num 1 --num_threads $threadsPerPlot --tmp_dir `"$tempDrive$tempFolder`" --final_dir `"$plotDir`" --buffer $memoryBuffer -x | Tee-Object -FilePath `"$logDir\Plot$($i)_$(Get-Date -Format dd-mm-yyyy-hh-mm).txt`"" }
                         $i++
                         #Quit if we've reached desired plot count, otherwise wait delay and start over
                         if ($i -lt $newPlots) {
