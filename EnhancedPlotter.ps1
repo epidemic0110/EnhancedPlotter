@@ -26,8 +26,8 @@
 #VARIABLES - Set these to match your environment.
 
 #MANDATORY
-$tempDrives = @("F:","T:") #Drives that you want to use for temp files
-$plotDir = "\\SERVERNAME\SharedFolder" #Local or shared Destination directory you want plots to be sent to (for example, \\SERVERNAME\Plots or G:\Plots)
+$tempDrives = @("F:","T:","C:") #Drives that you want to use for temp files
+$plotDir = "\\corei5beast\corei5plot03" #Local or shared Destination directory you want plots to be sent to (for example, \\SERVERNAME\Plots or G:\Plots)
 $newPlots = 30 #Total number of plots to produce
 
 #OPTIONAL - Advanced settings
@@ -37,14 +37,14 @@ $temp2Dir = $null #Full path to a directory to be used for staging the finished 
 $tempPlotSize = 240 #Size in GiB that the temp files for one k32 plot take (Currently ~240GiB/260GB as of v1.1.3)
 $threadsPerPlot = 2 #How many processor each plotting process should use. Feel free to experiment with higher numbers on high core systems, but general consesus is that there are diminishing returns above 2 threads
 $checkDelaySeconds = 600 #Delay (in seconds) between checks for sufficient free resources to start a new plot; DON'T SET THIS TOO LOW OR YOU RISK OVER-FILLING A DISK. 300-900 seconds (5-15 minutes) seem to be good values
-$lowDiskThreshold = .70 #A queue length of 1.0 or greater means a disk is saturated and cannot handle any more concurrent requests. Anything less than 1.0 theoretically means the disk isn't fully utilized, however it may not be ideal to target full saturation, especially on mechanical drives. A threshold in the range of .5-.8 is suggested, but tweak and let me know what you find best for overall throughput
-$lowCpuThreshold = 76 #How low should the CPU utilization percent be before a new plot is allowed to be started if other resources are free; This will vary depending on core count and if this is a dedicated plotter or not. If it is doing nothing else and you have lots of cores, you might want to set this to a high value, like 85%. If it is running a full node or farmer, you might want to keep it a bit lower to prevent plotting from using all of the CPU
+$lowDiskThreshold = .90 #A queue length of 1.0 or greater means a disk is saturated and cannot handle any more concurrent requests. Anything less than 1.0 theoretically means the disk isn't fully utilized, however it may not be ideal to target full saturation, especially on mechanical drives. A threshold in the range of .5-.8 is suggested, but tweak and let me know what you find best for overall throughput
+$lowCpuThreshold = 85 #How low should the CPU utilization percent be before a new plot is allowed to be started if other resources are free; This will vary depending on core count and if this is a dedicated plotter or not. If it is doing nothing else and you have lots of cores, you might want to set this to a high value, like 85%. If it is running a full node or farmer, you might want to keep it a bit lower to prevent plotting from using all of the CPU
 $lowMemThreshold = 512 #Don't start a new plot if it would make system free memory drop below this amount (MB). For example if your $memoryBuffer value is set to 4096MB per plot, and your current system free memory is less than 4096+$lowMemThreshold, it won't start a new plot
-$memoryBuffer = 3390 #Amount of memory to limit each plotting process to. Default is 3390MiB but if you have lots of memory and CPU or disk I/O are your bottleneck, you can try increasing this number
+$memoryBuffer = 4096 #Amount of memory to limit each plotting process to. Default is 3390MiB but if you have lots of memory and CPU or disk I/O are your bottleneck, you can try increasing this number
 $initialDelayMinutes = 20 #Stagger delay (in minutes) before the very first instance starts on each tempDrive after the first. May help distribute plotting load across phases better, but untested- not sure if helpful or harmful to overall throughput.
-$discordLogging = $false #Set to $true to log to Discord with following webhook URL and username to shout @
-$hookUrl = 'https://discord.com/api/webhooks/SAMPLE/URL' #Discord webhook URL for Discord logging (only mandatory if $discordLogging set to $true)
-$targetUser = "" #Discord username to call out @ (optional)
+$discordLogging = $true #Set to $true to log to Discord with following webhook URL and username to shout @
+$hookUrl = 'https://discord.com/api/webhooks/838976333157105704/Hh3a1DiNntD3TUE0HuA6dTzVXab2OcHoEIIXmOaXQS8vyHgV80ZoS4nZMcwxpa5_TmzQ' #Discord webhook URL for Discord logging (only mandatory if $discordLogging set to $true)
+$targetUser = "Epidemic#1568" #Discord username to call out @ (optional)
 ###################################################################################
 
 #FUNCTIONS

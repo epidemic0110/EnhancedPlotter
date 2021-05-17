@@ -16,7 +16,7 @@
 .OUTPUTS
     void
 .NOTES
-    Version: 1.5.1
+    Version: 1.5.2
     Author:  /u/epidemic0110
     Email: enhancedchia [@] gmail.com (Send me feedback, please! I'm dyin here!)
     Donation: xch18n2p6ml9sud595kws9m3x38ujh4dgt60sdstk9cpzke9f0qtzrzq079jfg (Hah! Why would anyone would donate their precious Chia XCH?!)
@@ -98,11 +98,11 @@ for ($i = 0; $i -lt $newPlots){
 
             #Check for sufficient free CPU using average of 3 samples over 3 seconds
             Write-Host "Checking for sufficient free CPU..."
-            $CPUSample1 = (Get-Counter '\Prozessor(_Total)\Prozessorzeit(%)').CounterSamples.CookedValue
+            $CPUSample1 = (Get-Counter '\prozessor(_total)\prozessorzeit (%)').CounterSamples.CookedValue
             sleep 1
-            $CPUSample2 = (Get-Counter '\Prozessor(_Total)\Prozessorzeit(%)').CounterSamples.CookedValue
+            $CPUSample2 = (Get-Counter '\prozessor(_total)\prozessorzeit (%)').CounterSamples.CookedValue
             sleep 1
-            $CPUSample3 = (Get-Counter '\Prozessor(_Total)\Prozessorzeit(%)').CounterSamples.CookedValue
+            $CPUSample3 = (Get-Counter '\prozessor(_total)\prozessorzeit (%)').CounterSamples.CookedValue
             $CPUAvg = [math]::Round(($CPUSample1 + $CPUSample2 + $CPUSample3) / 3)
             if ($CPUAvg -lt $lowCpuThreshold) {
                 Write-Host "Sufficient free CPU of $(100-$CPUAvg)%. Continuing..."
@@ -126,7 +126,7 @@ for ($i = 0; $i -lt $newPlots){
                 if ($tempSpace.FreeSpace -gt $($tempPlotSize*1024*1024*1024 + $reservedSpace)){
                     Write-Host "Free space on $tempDrive $([math]::Round($tempSpace.FreeSpace/1024/1024/1024)) GiB is large enough to hold new $tempPlotSize GiB plot + $($reservedSpace/1024/1024/1024) GiB running plotting processes. Continuing... "
                     #Check for sufficient disk IO
-                    $tempQueue = [math]::Round((Get-Counter "\Physikalischer Datenträger(* $tempDrive)\Durschnittl. Warteschlangenlänge des Datenträgers").CounterSamples.CookedValue,3)
+                    $tempQueue = [math]::Round((Get-Counter "\Physikalischer Datenträger(* $tempDrive)\Aktuelle Warteschlangenlänge").CounterSamples.CookedValue,3)
                     if ($tempQueue -lt $lowDiskThreshold) {
                         Write-Host "Disk queue length $tempQueue is below $lowDiskThreshold. Continuing..."
 
